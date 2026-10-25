@@ -1,46 +1,4 @@
 <!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AMDA DJ PRO - SPECTRUM KALEM</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#0a0a0a;color:#fff;font-family:system-ui}
-.box{background:#1a1a1a;border-radius:12px;padding:10px;margin:8px;border:1px solid #333}
-input[type=text]{width:100%;padding:12px;background:#000;color:#0f0;border:1px solid #0f0;border-radius:8px}
-.btn{width:100%;padding:14px;border:none;border-radius:8px;font-weight:900;font-size:16px;margin-top:8px}
-.yt{background:#0f0;color:#000}
-.add{background:#ffeb00;color:#000}
-.eqbtn{background:#00f0f0;color:#000}
-.playlist-item{background:#00f0f0;color:#000;padding:10px;border-radius:6px;margin-top:6px;display:flex;justify-content:space-between;font-weight:700}
-canvas{width:100%;background:#000;border-radius:8px;border:2px solid #00f0f0;display:block}
-</style>
-</head>
-<body>
-<div class="box">
-<input id="ytLink" type="text" placeholder="Link YT: youtu.be/xxxx">
-<button class="btn yt" onclick="playYT()">▶️ YT</button>
-<div id="ytPlayer" style="margin-top:8px;display:none"></div>
-</div>
-<div class="box">
-<input type="file" id="fileInput" multiple accept="audio/*" style="width:100%;padding:8px;background:#000;color:#fff;border-radius:8px">
-<button class="btn add" onclick="tambahLagu()">➕ TAMBAH LAGU</button>
-<audio id="audio" controls style="width:100%;margin-top:10px"></audio>
-<button class="btn eqbtn" id="eqBtn" onclick="toggleEQ()">🎛️ EQ ON ✅</button>
-<div id="playlist"></div>
-<div style="text-align:center;color:#0f0;margin-top:8px;font-weight:900" id="count">0 lagu</div>
-</div>
-<div class="box">
-<canvas id="spectrum" height="140"></canvas>
-<canvas id="eqGraph" height="200" style="margin-top:8px;background:#111"></canvas>
-<div style="display:flex;gap:8px;margin-top:8px">
-<button class="btn" style="flex:1;background:#333;color:#aaa" onclick="setFlat()">FLAT</button>
-<button class="btn" style="flex:1;background:#00f0f0;color:#000" onclick="setBass()">BASS</button>
-</div>
-</div>
-<script>
-let songs=[],audio=document.getElementById('audio'),fileInput=document.getElementById('fileInput');
-let audioCtx,analyser,source,filters=[];
-let eqValues=[6,4,-1,-4,1];const freqs=[60,230,910,3600,14000];
-const cSpec=document.getElementById('spectrum'),ctxSpec=cSpec.getContext
+<html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>AMDA DJ KALEM 25%</title><style>*{margin:0;padding:0;box-sizing:border-box}body{background:#0a0a0a;color:#fff;font-family:system-ui}.box{background:#1a1a1a;border-radius:12px;padding:10px;margin:8px;border:1px solid #333}input[type=text]{width:100%;padding:12px;background:#000;color:#0f0;border:1px solid #0f0;border-radius:8px}.btn{width:100%;padding:14px;border:none;border-radius:8px;font-weight:900;font-size:16px;margin-top:8px}.yt{background:#0f0;color:#000}.add{background:#ffeb00;color:#000}.eqbtn{background:#00f0f0;color:#000}.playlist-item{background:#00f0f0;color:#000;padding:10px;border-radius:6px;margin-top:6px;display:flex;justify-content:space-between;font-weight:700}canvas{width:100%;background:#000;border-radius:8px;border:2px solid #00f0f0;display:block}</style></head><body><div class="box"><input id="ytLink" type="text" placeholder="Link YT"><button class="btn yt" onclick="playYT()">▶️ YT</button><div id="ytPlayer" style="margin-top:8px;display:none"></div></div><div class="box"><input type="file" id="fileInput" multiple accept="audio/*" style="width:100%;padding:8px;background:#000;color:#fff;border-radius:8px"><button class="btn add" onclick="tambahLagu()">➕ TAMBAH LAGU</button><audio id="audio" controls style="width:100%;margin-top:10px"></audio><button class="btn eqbtn" onclick="toggleEQ()">🎛️ EQ ON ✅</button><div id="playlist"></div><div style="text-align:center;color:#0f0;margin-top:8px;font-weight:900" id="count">0 lagu</div></div><div class="box"><canvas id="spectrum" height="140"></canvas><canvas id="eqGraph" height="200" style="margin-top:8px;background:#111"></canvas><div style="display:flex;gap:8px;margin-top:8px"><button class="btn" style="flex:1;background:#333;color:#aaa" onclick="setFlat()">FLAT</button><button class="btn" style="flex:1;background:#00f0f0;color:#000" onclick="setBass()">BASS</button></div></div><script>
+let songs=[],audio=document.getElementById('audio'),fileInput=document.getElementById('fileInput');let audioCtx,analyser,source,filters=[];let eqValues=[6,4,-1,-4,1];const freqs=[60,230,910,3600,14000];const cSpec=document.getElementById('spectrum'),ctxSpec=cSpec.getContext('2d');const cEQ=document.getElementById('eqGraph'),ctxEQ=cEQ.getContext('2d');function resize(){cSpec.width=cSpec.clientWidth*2;cSpec.height=140*2;cEQ.width=cEQ.clientWidth*2;cEQ.height=200*2;drawEQ();}window.onresize=resize;resize();function initAudio(){if(audioCtx)return;audioCtx=new(window.AudioContext||window.webkitAudioContext)();analyser=audioCtx.createAnalyser();analyser.fftSize=256;analyser.smoothingTimeConstant=0.85;filters=freqs.map((f,i)=>{let fl=audioCtx.createBiquadFilter();fl.type=i==0?'lowshelf':i==4?'highshelf':'peaking';fl.frequency.value=f;fl.gain.value=eqValues[i];return fl;});let gainNode=audioCtx.createGain();source=audioCtx.createMediaElementSource(audio);source.connect(filters[0]);for(let i=0;i<filters.length-1;i++)filters[i].connect(filters[i+1]);filters[filters.length-1].connect(gainNode);gainNode.connect(analyser);analyser.connect(audioCtx.destination);}function updateEQ(){if(!filters.length)return;filters.forEach((f,i)=>f.gain.value=eqValues[i]);drawEQ();}function tambahLagu(){let files=fileInput.files;if(!files.length){alert('Pilih file');return;}for(let f of files)songs.push({name:f.name,url:URL.createObjectURL(f)});renderPlaylist();fileInput.value='';}function renderPlaylist(){let pl=document.getElementById('playlist');pl.innerHTML='';songs.forEach((s,i)=>{let d=document.createElement('div');d.className='playlist-item';d.innerHTML=`<span onclick="playSong(${i})" style="flex:1">${i+1}.${s.name}</span><span onclick="hapus(${i})" style="color:red;padding:0 10px">X</span>`;pl.appendChild(d);});document.getElementById('count').textContent=songs.length+' lagu';}function playSong(i){if(!audioCtx)initAudio();if(audioCtx.state==='suspended')audioCtx.resume();stopYT();audio.src=songs[i].url;audio.play();}function hapus(i){songs.splice(i,1);renderPlaylist();}audio.onplay=()=>{stopYT();if(!audioCtx)initAudio();if(audioCtx)audioCtx.resume();};let ytPlayer=null,ytReady=false;function playYT(){let link=document.getElementById('ytLink').value.trim();if(!link)return;let id=link.match(/(?:youtu\.be\/|v=|embed\/)([a-zA-Z0-9_-]{11})/);if(!id)return;id=id[1];audio.pause();document.getElementById('ytPlayer').style.display='block';if(!ytReady){let tag=document.createElement('script');tag.src="https://www.youtube.com/iframe_api";document.body.appendChild(tag);window.onYouTubeIframeAPIReady=()=>{ytReady=true;createYT(id);}}else createYT(id);}function createYT(id){if(ytPlayer){ytPlayer.loadVideoById(id);return;}ytPlayer=new YT.Player('ytPlayer',{height:'220',width:'100%',videoId:id,playerVars:{playsinline:1},events:{onReady:e=>e.target.playVideo()}});}function stopYT(){if(ytPlayer&&ytPlayer.pauseVideo)try{ytPlayer.pauseVideo();}catch(e){}}let active=-1;function drawEQ(){let w=cEQ.width,h=cEQ.height;ctxEQ.clearRect(0,0,w,h);ctxEQ.strokeStyle='#222';for(let i=1;i<6;i++){ctxEQ.beginPath();ctxEQ.moveTo(0,h*i/6);ctxEQ.lineTo(w,h*i/6);ctxEQ.stroke();}ctxEQ.strokeStyle='#ff00ff';ctxEQ.lineWidth=6;ctxEQ.beginPath();let pts=freqs.map((f,i)=>{let x=(i/(freqs.length-1))*w;let y=h/2-eqValues[i]*10;return{x,y,i};});ctxEQ.moveTo(pts[0].x,pts[0].y);for(let i=1;i<pts.length;i++){let mx=(pts[i-1].x+pts[i].x)/2;ctxEQ.lineTo(mx,pts[i-1].y);ctxEQ.lineTo(mx,pts[i].y);ctxEQ.lineTo(pts[i].x,pts[i].y);}ctxEQ.stroke();pts.forEach(p=>{ctxEQ.fillStyle='#00f0f0';ctxEQ.beginPath();ctxEQ.arc(p.x,p.y,20,0,Math.PI*2);ctxEQ.fill();ctxEQ.fillStyle='#fff';ctxEQ.font='bold 22px sans-serif';ctxEQ.textAlign='center';ctxEQ.fillText(Math.round(eqValues[p.i])+'dB',p.x,p.y-30);});cEQ._pts=pts;}function getPos(e){let r=cEQ.getBoundingClientRect();let t=e.touches?e.touches[0]:e;return{x:(t.clientX-r.left)*(cEQ.width/r.width),y:(t.clientY-r.top)*(cEQ.height/r.height)};}function sH(e){e.preventDefault();let p=getPos(e);(cEQ._pts||[]).forEach(pt=>{if(Math.hypot(p.x-pt.x,p.y-pt.y)<50)active=pt.i;});}function mH(e){if(active<0)return;e.preventDefault();let p=getPos(e);let v=(cEQ.height/2-p.y)/10;v=Math.max(-12,Math.min(12,v));eqValues[active]=v;updateEQ();}function eH(){active=-1;}cEQ.addEventListener('mousedown',sH);cEQ.addEventListener('mousemove',mH);window.addEventListener('mouseup',eH);cEQ.addEventListener('touchstart',sH,{passive:false});cEQ.addEventListener('touchmove',mH,{passive:false});cEQ.addEventListener('touchend',eH);function setFlat(){eqValues=[0,0,0,0,0];updateEQ();}function setBass(){eqValues=[6,4,-1,-4,1];updateEQ();}function toggleEQ(){if(!audioCtx)initAudio();filters.forEach((f,i)=>f.gain.value=eqValues[i]);}function loop(){requestAnimationFrame(loop);if(!analyser){ctxSpec.fillStyle='#000';ctxSpec.fillRect(0,0,cSpec.width,cSpec.height);ctxSpec.fillStyle='#0f0';ctxSpec.font='bold 18px sans-serif';ctxSpec.textAlign='center';ctxSpec.fillText('Klik PLAY bos',cSpec.width/2,cSpec.height/2);return;}let data=new Uint8Array(analyser.frequencyBinCount);analyser.getByteFrequencyData(data);ctxSpec.fillStyle='#000';ctxSpec.fillRect(0,0,cSpec.width,cSpec.height);let barW=cSpec.width/data.length*2.2;let x=0;for(let i=0;i<data.length;i++){let h=(data[i]/255)*cSpec.height*0.25;let hue=i<10?320:200;ctxSpec.fillStyle=`hsl(${hue},100%,60%)`;ctxSpec.fillRect(x,cSpec.height-h,barW,h);x+=barW+1;}}loop();setBass();
+</script></body></html>
